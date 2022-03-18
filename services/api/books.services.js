@@ -3,7 +3,7 @@ const mysqlconn = require("../../utilities/mysql.utils");
 
 // all books
 const getAll = async () => {
-  const rows = await mysqlconn.query(`select * from books`);
+  const rows = await mysqlconn.query(`select * from user`);
   return rows;
 };
 

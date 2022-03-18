@@ -6,11 +6,13 @@ const booksRouterApi = require("./books");
 const phoneRouterApi = require("./phone");
 const postsRouterApi = require("./posts");
 const authRouterApi = require("./auth");
+const productRouterApi = require("./product");
 
 router.use("/books", booksRouterApi);
 router.use("/auth", authRouterApi);
 router.use("/phone", phoneRouterApi);
 router.use("/posts", postsRouterApi);
+router.use("/product", productRouterApi);
 
 router.get("/", (req, res, next) => {
   // loggerConsole.info("Welcome to the api");
