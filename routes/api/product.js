@@ -66,17 +66,15 @@ productRouterApi.post(
 productRouterApi.put(
     "/:id",
     upload.array(),
-    authMiddleware.verifyToken,
+    // authMiddleware.verifyToken,
     async (req, res, next) => {
-        const id_book = req.params.id;
-        const { name, author, year, description } = req.body;
+        const id_produk = req.params.id;
+        const { nama_produk, id_kategori } = req.body;
         try {
             const result_edit = await productServiceApi.update({
-                id_book,
-                name,
-                author,
-                year,
-                description,
+                id_produk,
+                nama_produk,
+                id_kategori
             });
             if (!result_edit.affectedRows) {
                 return responses.InternalServerError(res, {

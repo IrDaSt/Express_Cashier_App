@@ -25,10 +25,10 @@ const create = async ({ nama_produk, id_kategori }) => {
 };
 
 // update book
-const update = async ({ id_book, name, author, year, description }) => {
+const update = async ({ id_produk, nama_produk, id_kategori }) => {
     const result = await mysqlconn.query(
-        "update books set name=?, author=?, year=?, description=? where id_book=?",
-        [name, author, year, description, id_book]
+        "update produk set nama_produk=?, id_kategori=? where id_produk=?",
+        [nama_produk, id_kategori, id_produk]
     );
     return result;
 };
@@ -48,5 +48,6 @@ const booksServicesApi = {
     update,
     remove,
 };
+
 
 module.exports = booksServicesApi;
