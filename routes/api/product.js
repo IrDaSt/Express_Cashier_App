@@ -14,8 +14,8 @@ const productRouterApi = express.Router();
 productRouterApi.get("/", async (req, res, next) => {
     try {
         // GET all books data
-        const books = await productServiceApi.getAll();
-        responses.Success(res, books);
+        const products = await productServiceApi.getAll();
+        responses.Success(res, products);
     } catch (error) {
         return responses.InternalServerErrorCatch(res, error);
     }
@@ -24,13 +24,13 @@ productRouterApi.get("/", async (req, res, next) => {
 // GET book data by id
 productRouterApi.get("/:id", async (req, res, next) => {
     try {
-        const book = await productServiceApi.getById(req.params.id);
-        if (!book.length) {
+        const product = await productServiceApi.getById(req.params.id);
+        if (!product.length) {
             return responses.InternalServerError(res, {
                 message: "Not Found",
             });
         }
-        responses.Success(res, book);
+        responses.Success(res, product);
     } catch (error) {
         return responses.InternalServerErrorCatch(res, error);
     }
@@ -40,7 +40,7 @@ productRouterApi.get("/:id", async (req, res, next) => {
 productRouterApi.post(
     "/",
     upload.array(),
-    // authMiddleware.verifyToken,
+    authMiddleware.verifyToken,
     async (req, res, next) => {
         const { nama_produk, id_kategori } = req.body;
         try {
@@ -66,7 +66,7 @@ productRouterApi.post(
 productRouterApi.put(
     "/:id",
     upload.array(),
-    // authMiddleware.verifyToken,
+    authMiddleware.verifyToken,
     async (req, res, next) => {
         const id_produk = req.params.id;
         const { nama_produk, id_kategori } = req.body;
@@ -95,9 +95,9 @@ productRouterApi.delete(
     "/:id",
     authMiddleware.verifyToken,
     async (req, res, next) => {
-        const id_book = req.params.id;
+        const id_produk = req.params.id;
         try {
-            const result_delete = await productServiceApi.remove(id_book);
+            const result_delete = await productServiceApi.remove(id_produk);
             if (!result_delete.affectedRows) {
                 return responses.InternalServerError(res, {
                     message: "Delete failed",

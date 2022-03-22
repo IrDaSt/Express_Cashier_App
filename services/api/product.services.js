@@ -35,7 +35,7 @@ const update = async ({ id_produk, nama_produk, id_kategori }) => {
 
 // remove book
 const remove = async (id_produk) => {
-    const result = await mysqlconn.query("delete from books where id_produk=?", [
+    const result = await mysqlconn.query("delete from produk where id_produk=?", [
         id_produk,
     ]);
     return result;

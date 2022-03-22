@@ -53,6 +53,7 @@ authRouterApi.post(
     const { email, password } = req.body;
     try {
       const result_check_email = await userServicesApi.checkEmail(email);
+      // const result_login = await userServicesApi.login(email, password);
       if (result_check_email.length === 0) {
         return responses.InternalServerError(res, {
           message: "login failed",
@@ -64,7 +65,7 @@ authRouterApi.post(
 
       if (encrypted_password === cryptoUtils.encryptWithSalt(password, salt)) {
         const token = jwtUtils.generateToken({
-          id_user: result_login[0].id_user,
+          id_user: result_check_email[0].id_user,
         });
         responses.Success(res, {
           message: "login success",
@@ -90,14 +91,14 @@ authRouterApi.post(
     .isEmail()
     .withMessage("email field must be and email"),
   body("password").notEmpty().withMessage("password field required"),
-  body("name").notEmpty().withMessage("name field required"),
+  body("nama").notEmpty().withMessage("name field required"),
   async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return responses.BadRequest(res, errors.array());
     }
 
-    const { email, password, name } = req.body;
+    const { email, password, nama } = req.body;
     try {
       const result_check_email = await userServicesApi.checkEmail(email);
       if (result_check_email.length > 0) {
@@ -113,7 +114,7 @@ authRouterApi.post(
           password,
           salt
         )}:${salt}`,
-        name,
+        nama,
       });
       if (!result_register.affectedRows) {
         return responses.InternalServerError(res, {

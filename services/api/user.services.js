@@ -20,23 +20,23 @@ const login = async ({ email, hashed_password }) => {
   return rows;
 };
 
-const register = async ({ id_user, email, hashed_password, name }) => {
+const register = async ({ id_user, email, hashed_password, nama }) => {
   const resultInsert = await mysqlconn.query(
-    `insert into akun(id_user, email, password, name) values (?,?,?,?)`,
-    [id_user, email, hashed_password, name]
+    `insert into user(id_user, nama, email, password) values (?,?,?,?)`,
+    [id_user, nama, email, hashed_password]
   );
   return resultInsert;
 };
 
 const checkEmail = async (email) => {
-  const checkEmail = await mysqlconn.query(`select * from akun where email=?`, [
+  const checkEmail = await mysqlconn.query(`select * from user where email=?`, [
     email,
   ]);
   return checkEmail;
 };
 
 const requestVerification = async (req) => {
-  const checkEmail = await mysqlconn.query(`select * from akun where email=?`, [
+  const checkEmail = await mysqlconn.query(`select * from user where email=?`, [
     req.body.email,
   ]);
   if (!checkEmail.length) {
