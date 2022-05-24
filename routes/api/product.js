@@ -3,9 +3,14 @@ const productServiceApi = require("../../services/api/product.services");
 const authMiddleware = require("../../middlewares/auth");
 const upload = require("../../middlewares/multer");
 const responses = require("../../utilities/responses.utils");
-
+const { validationResult } = require("express-validator");
 const productRouterApi = express.Router();
-
+const fsUtils = require("../../utilities/fs.utils");
+const mysqlconn = require("../../utilities/mysql.utils");
+const idGeneratorUtils = require("../../utilities/id-generator.utils");
+const moment = require('moment')
+const path = require('path');
+const { generateUUIDV4 } = require("../../utilities/id-generator.utils");
 /**
  * This is an example on how to implement mysql query with promise
  */
@@ -21,41 +26,174 @@ productRouterApi.get("/", async (req, res, next) => {
     }
 });
 
-// GET book data by id
-productRouterApi.get("/:id", async (req, res, next) => {
+// Get Product By ID User
+productRouterApi.get("/user/:id", async (req, res, next) => {
     try {
-        const product = await productServiceApi.getById(req.params.id);
-        if (!product.length) {
+        const product_user = await productServiceApi.getByUserId(req.params.id);
+        if (!product_user.length) {
             return responses.InternalServerError(res, {
                 message: "Not Found",
             });
         }
-        responses.Success(res, product);
+        responses.Success(res, product_user);
     } catch (error) {
         return responses.InternalServerErrorCatch(res, error);
     }
 });
 
+// Get Product By ID Kategori
+productRouterApi.get("/kategori/:id", async (req, res, next) => {
+    try {
+        const product_kategori = await productServiceApi.getByKategoriId(req.params.id);
+        if (!product_kategori.length) {
+            return responses.InternalServerError(res, {
+                message: "Not Found",
+            });
+        }
+        responses.Success(res, product_kategori);
+    } catch (error) {
+        return responses.InternalServerErrorCatch(res, error);
+    }
+});
+
+productRouterApi.post(
+    "/gambar",
+    upload.fields([{ name: 'fotoproduk' }]),
+    async (req, res, next) => {
+        const errors = validationResult(req)
+        const files = req.files;
+        if (!errors.isEmpty()) {
+            if (files && files['fotoproduk']) {
+                await fsUtils.deleteOne('./' + files['fotoproduk'][0].path)
+            }
+            return responses.BadRequest(res, errors.array())
+        }
+        console.log(req.files['fotoproduk'])
+
+        if (files && files['fotoproduk'] && !files['fotoproduk'][0].mimetype.startsWith('image')) {
+            await fsUtils.deleteOne('./' + files['fotoproduk'][0].path)
+            return responses.BadRequest(res, {
+                message: 'file must be an image',
+            })
+        }
+
+        try {
+            let link_foto_fotoproduk = "";
+            if (files && files['fotoproduk']) {
+                await fsUtils.ensureDir('./public/data/uploads/gambar_produk')
+                link_foto_fotoproduk =
+                    'data/uploads/gambar_produk/' +
+                    `${idGeneratorUtils.generateUUIDV4()}_${moment().format(
+                        'YYYY-MM-DD',
+                    )}${path.extname(files['fotoproduk'][0].filename)}`
+
+                // Move Original File
+                await fsUtils.moveOrRename('./' + files['fotoproduk'][0].path, `./public/${link_foto_fotoproduk}`)
+            }
+
+
+            // Insert DB
+            const result_insert_image = await productServiceApi.uploadgambar({
+                link_foto_produk: link_foto_fotoproduk
+            })
+            if (!result_insert_image) {
+                return responses.InternalServerError(res, {
+                    message: 'Insert error',
+                })
+            }
+            else {
+                res.json({
+                    message: 'Insert Success'
+                })
+            }
+        }
+        catch (error) {
+            if (files && files['fotoproduk']) {
+                await fsUtils.deleteOne('./' + files['fotoproduk'][0].path)
+            }
+            return responses.InternalServerErrorCatch(res, error)
+        }
+
+    })
+
+
+
 // POST create new book
 productRouterApi.post(
     "/",
-    upload.array(),
+    upload.fields([{ name: 'fotoproduk' }]),
+    // upload.array(),
     authMiddleware.verifyToken,
     async (req, res, next) => {
-        const { nama_produk, id_kategori } = req.body;
+        const errors = validationResult(req)
+        const { nama_produk, id_kategori, id_user
+        } = req.body;
+        const id_produk = idGeneratorUtils.generateUUIDV4();
+        const files = req.files;
+        if (!errors.isEmpty()) {
+            if (files && files['fotoproduk']) {
+                await fsUtils.deleteOne('./' + files['fotoproduk'][0].path)
+            }
+            return responses.BadRequest(res, errors.array())
+        }
+        // console.log(req.files['fotoproduk'])
+
+        if (files && files['fotoproduk'] && !files['fotoproduk'][0].mimetype.startsWith('image')) {
+            await fsUtils.deleteOne('./' + files['fotoproduk'][0].path)
+            return responses.BadRequest(res, {
+                message: 'file must be an image',
+            })
+        }
         try {
+            let link_foto_fotoproduk = "";
+            if (files && files['fotoproduk']) {
+                await fsUtils.ensureDir('./public/data/uploads/gambar_produk')
+                link_foto_fotoproduk =
+                    'data/uploads/gambar_produk/' +
+                    `${idGeneratorUtils.generateUUIDV4()}_${moment().format(
+                        'YYYY-MM-DD',
+                    )}${path.extname(files['fotoproduk'][0].filename)}`
+
+                // Move Original File
+                await fsUtils.moveOrRename('./' + files['fotoproduk'][0].path, `./public/${link_foto_fotoproduk}`)
+            }
+
+
+            // Insert DB
+            // const result_insert_image = await productServiceApi.uploadgambar({
+            //     link_foto_produk: link_foto_fotoproduk
+            // })
+            // if (!result_insert_image) {
+            //     return responses.InternalServerError(res, {
+            //         message: 'Insert error',
+            //     })
+            // }
+            // else {
+            //     res.json({
+            //         message: 'Insert Success'
+            //     })
+            // }
+
+
+            // Add Product
             const result_insert = await productServiceApi.create({
+                id_produk: id_produk,
                 nama_produk: nama_produk,
-                id_kategori: id_kategori
+                id_kategori: id_kategori,
+                id_user: id_user,
+                link_foto_produk: link_foto_fotoproduk
             });
+
             if (!result_insert.affectedRows) {
                 return responses.InternalServerError(res, {
-                    message: "Insert failed",
+                    message: "Insert Produk failed",
                 });
             }
             responses.Created(res, {
                 message: "Insert success",
             });
+
+
         } catch (error) {
             return responses.InternalServerErrorCatch(res, error);
         }
@@ -111,5 +249,20 @@ productRouterApi.delete(
         }
     }
 );
+
+// GET book data by id
+productRouterApi.get("/:id", async (req, res, next) => {
+    try {
+        const product = await productServiceApi.getById(req.params.id);
+        if (!product.length) {
+            return responses.InternalServerError(res, {
+                message: "Not Found",
+            });
+        }
+        responses.Success(res, product);
+    } catch (error) {
+        return responses.InternalServerErrorCatch(res, error);
+    }
+});
 
 module.exports = productRouterApi;

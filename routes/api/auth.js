@@ -92,13 +92,14 @@ authRouterApi.post(
     .withMessage("email field must be and email"),
   body("password").notEmpty().withMessage("password field required"),
   body("nama").notEmpty().withMessage("name field required"),
+  body("nama_toko").notEmpty().withMessage("nama toko required"),
   async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return responses.BadRequest(res, errors.array());
     }
 
-    const { email, password, nama } = req.body;
+    const { email, password, nama, nama_toko } = req.body;
     try {
       const result_check_email = await userServicesApi.checkEmail(email);
       if (result_check_email.length > 0) {
@@ -109,6 +110,7 @@ authRouterApi.post(
       const salt = cryptoUtils.generateSalt();
       const result_register = await userServicesApi.register({
         id_user: idGeneratorUtils.generateUUIDV4(),
+        nama_toko,
         email,
         hashed_password: `${cryptoUtils.encryptWithSalt(
           password,

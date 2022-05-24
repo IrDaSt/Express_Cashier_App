@@ -20,10 +20,10 @@ const login = async ({ email, hashed_password }) => {
   return rows;
 };
 
-const register = async ({ id_user, email, hashed_password, nama }) => {
+const register = async ({ id_user, email, hashed_password, nama, nama_toko }) => {
   const resultInsert = await mysqlconn.query(
-    `insert into user(id_user, nama, email, password) values (?,?,?,?)`,
-    [id_user, nama, email, hashed_password]
+    `insert into user(id_user, nama, nama_toko, email, password) values (?,?,?,?,?)`,
+    [id_user, nama, nama_toko, email, hashed_password]
   );
   return resultInsert;
 };
