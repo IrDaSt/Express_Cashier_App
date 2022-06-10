@@ -265,4 +265,20 @@ productRouterApi.get("/:id", async (req, res, next) => {
     }
 })
 
+productRouterApi.get("/andkategori:id", async (req, res, next) => {
+    try {
+        const product = await productServiceApi.getByIdAndKategori(
+            req.params.id,
+        )
+        if (!product.length) {
+            return responses.InternalServerError(res, {
+                message: "Not Found",
+            })
+        }
+        responses.Success(res, product)
+    } catch (error) {
+        return responses.InternalServerErrorCatch(res, error)
+    }
+})
+
 module.exports = productRouterApi
