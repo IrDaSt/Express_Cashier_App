@@ -72,6 +72,14 @@ const getByUserId = async (id_user) => {
     return rows
 }
 
+// Nama Product by id user
+const getNamaProdukByUserId = async (id_user) => {
+    const rows = await mysqlconn.query("Select nama_produk from produk where id_user=?", [
+        id_user,
+    ])
+    return rows
+}
+
 // create product
 const create = async ({
     id_produk = idGeneratorUtils.generateUUIDV4(),
@@ -142,6 +150,7 @@ const productsServicesApi = {
     getByKategoriId,
     getByUserId,
     getByIdAndKategori,
+    getNamaProdukByUserId,
 }
 
 module.exports = productsServicesApi

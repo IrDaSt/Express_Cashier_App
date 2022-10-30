@@ -41,6 +41,21 @@ productRouterApi.get("/user/:id", async (req, res, next) => {
     }
 })
 
+// Get Nama Product By ID User
+productRouterApi.get("/namaproduk/:id", async (req, res, next) => {
+    try {
+        const namaproduct_user = await productServiceApi.getNamaProdukByUserId(req.params.id)
+        if (!namaproduct_user.length) {
+            return responses.InternalServerError(res, {
+                message: "Not Found",
+            })
+        }
+        responses.Success(res, namaproduct_user)
+    } catch (error) {
+        return responses.InternalServerErrorCatch(res, error)
+    }
+})
+
 // Get Product By ID Kategori
 productRouterApi.get("/kategori/:id", async (req, res, next) => {
     try {
